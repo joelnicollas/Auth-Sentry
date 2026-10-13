@@ -1,0 +1,19 @@
+# Python & Ambiente Virtual
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+
+# Relatórios e saídas
+reports/*.json
+reports/*.md
+!reports/.gitkeep
+
+# Logs locais
+data/*.log
+!data/.gitkeep
+
+# IDEs
+.idea/
+.vscode/
