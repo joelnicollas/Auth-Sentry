@@ -19,7 +19,7 @@ class LogParser:
     PATTERNS = [
         (
             re.compile(
-                r"^(?P<time>[A-Z][a-z]{2}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
                 r"(?P<host>\S+)\s+(?P<proc>sshd\[\d+\]):\s+"
                 r"Failed password for invalid user (?P<user>\S+)\s+"
                 r"from\s+(?P<ip>\d{1,3}(?:\.\d{1,3}){3})\s+port\s+(?P<port>\d+)"
@@ -28,7 +28,7 @@ class LogParser:
         ),
         (
             re.compile(
-                r"^(?P<time>[A-Z][a-z]{2}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
                 r"(?P<host>\S+)\s+(?P<proc>sshd\[\d+\]):\s+"
                 r"Failed password for (?P<user>\S+)\s+"
                 r"from\s+(?P<ip>\d{1,3}(?:\.\d{1,3}){3})\s+port\s+(?P<port>\d+)"
@@ -37,12 +37,36 @@ class LogParser:
         ),
         (
             re.compile(
-                r"^(?P<time>[A-Z][a-z]{2}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
                 r"(?P<host>\S+)\s+(?P<proc>sshd\[\d+\]):\s+"
                 r"Accepted (?:password|publickey) for (?P<user>\S+)\s+"
                 r"from\s+(?P<ip>\d{1,3}(?:\.\d{1,3}){3})\s+port\s+(?P<port>\d+)"
             ),
             "SUCCESS_LOGIN",
+        ),
+        (
+            re.compile(
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"(?P<host>\S+)\s+(?P<proc>sudo(?:\[\d+\])?):\s+"
+                r"(?P<user>\S+)\s*:\s+TTY=\S+\s+;\s+PWD=\S+\s+;\s+USER=(?P<target>\S+)\s+;\s+COMMAND=(?P<cmd>.*)"
+            ),
+            "SUDO_EXEC",
+        ),
+        (
+            re.compile(
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"(?P<host>\S+)\s+(?P<proc>\S+\[\d+\]):\s+"
+                r"pam_unix\(\S+\):\s+session opened for user (?P<user>\S+)"
+            ),
+            "SESSION_OPEN",
+        ),
+        (
+            re.compile(
+                r"^(?P<time>[A-Za-z]{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+"
+                r"(?P<host>\S+)\s+(?P<proc>\S+\[\d+\]):\s+"
+                r"pam_unix\(\S+\):\s+session closed for user (?P<user>\S+)"
+            ),
+            "SESSION_CLOSE",
         ),
     ]
 

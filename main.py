@@ -9,33 +9,39 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from auth_sentry.parser import LogParser
 from auth_sentry.engine import SIEMCorrelationEngine
 from auth_sentry.reporter import ReportGenerator
+from auth_sentry.detector import SystemLogDetector
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="AuthSentry: Detecção de ameaças e análise de logs de autenticação."
+        description="AuthSentry: Detecao de ameacas e correlacao de logs de autenticacao."
     )
-    parser.add_argument("-f", "--file", required=True, help="Arquivo de log a ser analisado")
-    parser.add_argument("--threshold", type=int, default=5, help="Limiar de falhas para alertar Brute Force (padrão: 5)")
-    parser.add_argument("--json", help="Caminho para exportar relatório JSON")
-    parser.add_argument("--md", help="Caminho para exportar relatório Markdown")
+    parser.add_argument(
+        "-f",
+        "--file",
+        required=False,
+        default=None,
+        help="Caminho do ficheiro de log"
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=5,
+        help="Limiar de falhas para disparar alerta de Brute Force"
+    )
+    parser.add_argument("--json", help="Caminho para exportar relatorio JSON")
+    parser.add_argument("--md", help="Caminho para exportar relatorio Markdown")
 
     args = parser.parse_args()
-
-    log_path = Path(args.file)
-    if not log_path.exists():
-        print(f"[-] Erro: Arquivo de log '{args.file}' não foi encontrado.")
-        sys.exit(1)
 
     events = []
     total_lines = 0
 
-    with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
-        for line in f:
-            total_lines += 1
-            event = LogParser.parse_line(line)
-            if event:
-                events.append(event)
+    for line in SystemLogDetector.get_log_stream(args.file):
+        total_lines += 1
+        event = LogParser.parse_line(line)
+        if event:
+            events.append(event)
 
     engine = SIEMCorrelationEngine(brute_force_threshold=args.threshold)
     alerts = engine.analyze(events)
